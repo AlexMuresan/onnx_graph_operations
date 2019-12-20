@@ -2,10 +2,13 @@
 Convert onnx models and graphs into dictionaries and do various operations on them
 
 ## Capabilities
-The script can do the following:
+The concat_graphs.py script can do the following:
 * convert a .onnx file into a dictionary
 * grab the inputs and outputs of a .onnx file as a dictionary or as a list
 * convert a dictionary or a list of dictionaries containing model specifications, inputs and outputs into a onnx graph
+
+The create_onnx_test_graphs.py generates two onnx models that can be used with concat_graphs.py in order to test functionality.
+This can be edited in order to create different architectures.
 
 ## TO-DO
 * find a way to programatically combine and modify onnx models and not manually edit the dictionaries:

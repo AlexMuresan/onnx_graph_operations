@@ -233,20 +233,3 @@ print('model_def_2 checks out')
 
 onnx.save(model_def_1, "model_1.onnx")
 onnx.save(model_def_2, "model_2.onnx")
-
-# variable_length_model = update_model_dims.update_inputs_outputs_dims(
-#     model=model_def,
-#     input_dims={'X': [-1, 3, 224, 224],
-#                 'W1': [7, 7], 'W2': [7, 7], 'W3': [7, 7], 'W4': [7, 7],
-#                 'W5': [7, 7], 'scale1': [1], 'scale2': [1], 'scale3': [1],
-#                 'scale4': [1], 'scale5': [1], 'bias1': [1], 'bias2': [1],
-#                 'bias3': [1], 'bias4': [1], 'bias5': [1], 'mean1': [1],
-#                 'mean2': [1], 'mean3': [1], 'mean4': [1], 'mean5': [1],
-#                 'var1': [1], 'var2': [1], 'var3': [1], 'var4': [1],
-#                 'var5': [1],
-#                 },
-#     output_dims={'sum': [-1, -1]}
-# )
-#
-# onnx.checker.check_model(variable_length_model)
-# print("Var length model checks out!")
