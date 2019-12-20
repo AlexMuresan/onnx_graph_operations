@@ -8,4 +8,7 @@ The script can do the following:
 * convert a dictionary or a list of dictionaries containing model specifications, inputs and outputs into a onnx graph
 
 ## TO-DO
-* find a way to programatically combine and modify onnx models and not manually edit the dictionaries
+* find a way to programatically combine and modify onnx models and not manually edit the dictionaries:
+	* check for collisions in the dictionaries that will be combined (onnx will throw an error if something is used as an output for two different things)
+	* find a way to specify at which node should the graphs be merged and automatically identify what should be added and what should be removed so the thing will work properly
+* any other things that show up and will prevent this for working properly
