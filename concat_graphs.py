@@ -6,8 +6,6 @@ import onnx.helper as helper
 import onnx.checker as checker
 import onnx.optimizer as optimizer
 
-import netron
-
 from pprint import pprint
 from collections import OrderedDict
 
@@ -117,22 +115,30 @@ def get_model_params(model_path, as_dict=False, get_inputs=True,
         return output_dims
 
 
-# def check_for_collisions(graph_list):
-#     keys_1 = set(graph_list[0].keys())
-#     keys_2 = set(graph_list[1].keys())
-
-#     keys_1.intersection(keys_2)
-
-
 def from_dicts_to_graph(graph_name, graph_dicts, input_dicts, output_dicts):
+    '''
+    Description:
+        Creates a onnx graph from the specified dictionaries
+    Params:
+        graph_name (string): name of the created graph
+        graph_dicts (dict or list): dictionary or list of dictionaries to be
+                                    used as graph structure
+        input_dicts (dict or list): dictionary or list of dictionaries with
+                                    the input specs of graph
+                                    model
+        output_dicts (dict or list): dictionary or list of dictionaries with
+                                     the output specs of graph
+                                     model
+    Returns:
+        GraphProto
+    '''
+
     graph_dicts = ([graph_dicts]
                    if type(graph_dicts) != list else graph_dicts)
     input_dicts = ([input_dicts]
                    if type(input_dicts) != list else input_dicts)
     output_dicts = ([output_dicts]
                     if type(output_dicts) != list else output_dicts)
-
-    # check_for_collisions(graph_dicts)
 
     graph_def = helper.make_graph(
         nodes=[
@@ -158,37 +164,50 @@ def from_dicts_to_graph(graph_name, graph_dicts, input_dicts, output_dicts):
     return graph_def
 
 
-graph_1 = get_model_dict('./model_1.onnx')
-graph_2 = get_model_dict('./model_2.onnx')
+# ################### Example usage for artificial graphs ################### #
+model_1_path = os.path.abspath('./model_1.onnx')
+model_2_path = os.path.abspath('./model_2.onnx')
+
+graph_1 = get_model_dict(model_1_path)
+graph_2 = get_model_dict(model_2_path)
+graph_3 = get_model_dict(model_2_path)
 
 
 model_inputs_1, model_outputs_1 = get_model_params(
-    './model_1.onnx',
-    as_dict=True)
-
-
+    model_1_path, as_dict=True)
 model_inputs_2, model_outputs_2 = get_model_params(
-    './model_2.onnx',
-    as_dict=True)
+    model_2_path, as_dict=True)
+model_inputs_3, model_outputs_3 = get_model_params(
+    model_2_path, as_dict=True)
 
 
-# graph_2['Conv_0']['inputs'] = graph_1['Conv_0']['inputs']
-# del model_inputs_2['tensor_value_info_0']
-# del model_inputs_2['tensor_value_info_1']
+# ############## Graphs that are joined to have the same input ############## #
 
-graph_2['BatchNormalization_0']['inputs'][0] = graph_1['BatchNormalization_0']['inputs'][0]
-print(graph_2['BatchNormalization_0']['inputs'])
-
-del graph_2['Conv_0']
+graph_2['Conv_0']['inputs'] = graph_1['Conv_0']['inputs']
 del model_inputs_2['tensor_value_info_0']
 del model_inputs_2['tensor_value_info_1']
 
-graph_def = from_dicts_to_graph("Reconstructed", [graph_1, graph_2],
-                                [model_inputs_1, model_inputs_2],
-                                [model_outputs_1, model_outputs_2])
+# ############## Graphs that are joined after a conv operation ############## #
 
-model_def = helper.make_model(graph_def)
+graph_3['BatchNormalization_0']['inputs'][0] = graph_1[
+    'BatchNormalization_0']['inputs'][0]
+print(graph_2['BatchNormalization_0']['inputs'])
+del graph_3['Conv_0']
+del model_inputs_3['tensor_value_info_0']
+del model_inputs_3['tensor_value_info_1']
+
+graph_def_1 = from_dicts_to_graph("Reconstructed_1", [graph_1, graph_2],
+                                  [model_inputs_1, model_inputs_2],
+                                  [model_outputs_1, model_outputs_2])
+
+graph_def_2 = from_dicts_to_graph("Reconstructed_2", [graph_1, graph_3],
+                                  [model_inputs_1, model_inputs_3],
+                                  [model_outputs_1, model_outputs_3])
+
+model_def = helper.make_model(graph_def_1)
+print("Model 1 checks out!")
+onnx.save_model(model_def, 'combined_model_1.onnx')
+
+model_def = helper.make_model(graph_def_2)
 print("Model 2 checks out!")
-
 onnx.save_model(model_def, 'combined_model_2.onnx')
-# netron.start('combined_model_2.onnx')
